@@ -9,6 +9,8 @@ import (
 )
 
 var homeTemplate *template.Template
+var contactTemplate *template.Template
+var faqTemplate *template.Template
 
 func home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
@@ -18,13 +20,17 @@ func home(w http.ResponseWriter, r *http.Request) {
 }
 
 func contact(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "To get in touch, please send an email "+
-		"to <a href=\"mailto:support@lenslocked.com\">"+
-		"support@lenslocked.com</a>.")
+	w.Header().Set("Content-Type", "text/html")
+	if err := contactTemplate.Execute(w, nil); err != nil {
+		panic(err)
+	}
 }
 
 func faq(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Welcome to the FAQ page.")
+	w.Header().Set("Content-Type", "text/html")
+	if err := faqTemplate.Execute(w, nil); err != nil {
+		panic(err)
+	}
 }
 
 func notFound(w http.ResponseWriter, r *http.Request) {
@@ -38,12 +44,22 @@ func main() {
 		panic(err)
 	}
 
+	contactTemplate, err = template.ParseFiles("views/contact.gohtml")
+	if err != nil {
+		panic(err)
+	}
+
+	faqTemplate, err = template.ParseFiles("views/faq.gohtml")
+	if err != nil {
+		panic(err)
+	}
+
 	var h http.Handler = http.HandlerFunc(notFound)
 	r := mux.NewRouter()
 	r.NotFoundHandler = h
 
 	r.HandleFunc("/", home)
 	r.HandleFunc("/contact", contact)
-	r.HandleFunc("/faq", contact)
+	r.HandleFunc("/faq", faq)
 	http.ListenAndServe(":3000", r)
 }
