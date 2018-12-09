@@ -2,33 +2,37 @@ package main
 
 import (
 	"fmt"
-	"html/template"
 	"net/http"
+
+	"lenslocked.com/views"
 
 	"github.com/gorilla/mux"
 )
 
-var homeTemplate *template.Template
-var contactTemplate *template.Template
-var faqTemplate *template.Template
+var homeView *views.View
+var contactView *views.View
+var faqView *views.View
 
 func home(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
-	if err := homeTemplate.Execute(w, nil); err != nil {
+	err := homeView.Template.Execute(w, nil)
+	if err != nil {
 		panic(err)
 	}
 }
 
 func contact(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
-	if err := contactTemplate.Execute(w, nil); err != nil {
+	err := contactView.Template.Execute(w, nil)
+	if err != nil {
 		panic(err)
 	}
 }
 
 func faq(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html")
-	if err := faqTemplate.Execute(w, nil); err != nil {
+	err := faqView.Template.Execute(w, nil)
+	if err != nil {
 		panic(err)
 	}
 }
@@ -38,21 +42,9 @@ func notFound(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	var err error
-	homeTemplate, err = template.ParseFiles("views/home.gohtml", "views/layouts/footer.gohtml")
-	if err != nil {
-		panic(err)
-	}
-
-	contactTemplate, err = template.ParseFiles("views/contact.gohtml", "views/layouts/footer.gohtml")
-	if err != nil {
-		panic(err)
-	}
-
-	faqTemplate, err = template.ParseFiles("views/faq.gohtml", "views/layouts/footer.gohtml")
-	if err != nil {
-		panic(err)
-	}
+	homeView = views.NewView("views/home.gohtml")
+	contactView = views.NewView("views/contact.gohtml")
+	faqView = views.NewView("views/faq.gohtml")
 
 	var h http.Handler = http.HandlerFunc(notFound)
 	r := mux.NewRouter()
